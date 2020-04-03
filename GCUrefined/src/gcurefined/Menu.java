@@ -20,18 +20,22 @@ public class Menu extends javax.swing.JFrame {
     PreparedStatement pst = null;
     Statement stmt = null;
     ResultSet rs = null;
+    String logged_in_customer;
     
 
-    /**
-     * Creates new form Menu
-     */
+    //Creates new form Menu
+     
     public Menu() {
         initComponents();
         createDatabase();
         createTables();
+        
     }
     
+    
     protected void createDatabase(){
+        //creates the database GCUBake
+        
         try{
         
         String database = "jdbc:mysql://127.0.0.1:3306/";
@@ -51,25 +55,30 @@ public class Menu extends javax.swing.JFrame {
         System.err.println(e.getMessage());
         
         }
-    
-    
     }
-    protected void getConnection(){
+    
+       
         
+        
+        
+    
+    protected Connection getConnection(){
+    //creates the connection for the mysql server 
+    
         try{
         String mysqlUrl = "jdbc:mysql://127.0.0.1:3306/GCUBake";
         String username = "root";
         String password = "Password";
         con = DriverManager.getConnection(mysqlUrl ,username,password);
+        
+        return con;
         }
         catch(Exception e){
             System.err.println("Got an exception");
             System.err.println(e.getMessage());
         
         
-        }
-    
-        
+        }return null;
     
     
     }
@@ -77,21 +86,24 @@ public class Menu extends javax.swing.JFrame {
         try{
             getConnection();
             //A backend method which creates the tables on the specified unit if it does not exist
-            
-            String createQuery1 = "CREATE TABLE IF NOT EXISTS User("
-                 + "userID INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(userID),"
+           String createTable1 = "CREATE TABLE IF NOT EXISTS Customer("
+                 + "customerID INT NOT NULL AUTO_INCREMENT, "
+                 + "PRIMARY KEY(customerID),"
                  + "customerStatus TEXT,"
                  + "title TEXT,"
                  + "firstname TEXT,"
                  + "lastname TEXT,"
                  + "contactNo TEXT,"
                  + "email TEXT,"
-                 + "username TEXT,"
-                 + "password TEXT);";
-            pst = con.prepareStatement(createQuery1);
+                 + "username VARCHAR(250),"
+                 + "password TEXT,"
+                 + "UNIQUE KEY(username));";
+            
+           
+            pst = con.prepareStatement(createTable1);
             pst.execute();
             
-         String createQuery2 = "CREATE TABLE IF NOT EXISTS Staff("
+         String createTable2 = "CREATE TABLE IF NOT EXISTS Staff("
                  + "staffID INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(staffID),"
                  + "role TEXT,"
                  + "firstname TEXT,"
@@ -100,22 +112,43 @@ public class Menu extends javax.swing.JFrame {
                  + "email TEXT,"
                  + "username TEXT,"
                  + "password TEXT);";
-            pst = con.prepareStatement(createQuery2);
+            pst = con.prepareStatement(createTable2);
             pst.execute();
             
-         String createQuery3 = "CREATE TABLE IF NOT EXISTS Login("
-                 + "loginID INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(loginID),"
+         String createTable3 = "CREATE TABLE IF NOT EXISTS Login("
+                 + "loginID INT NOT NULL AUTO_INCREMENT, "
+                 + "PRIMARY KEY(loginID),"
                  + "username TEXT,"
                  + "password TEXT);";
-            pst = con.prepareStatement(createQuery3);
+            pst = con.prepareStatement(createTable3);
             pst.execute();
             
-            String createQuery4 = "CREATE TABLE IF NOT EXISTS Lessons("
-                 + "lessonID INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(lessonID),"
-                 + "lessonType TEXT,"
-                 + "lessonSatus TEXT);";
-         pst = con.prepareStatement(createQuery4);
+            
+             String createTable4 = "CREATE TABLE IF NOT EXISTS Lessons("
+                 + "lessonID INT NOT NULL AUTO_INCREMENT, "
+                 + "PRIMARY KEY(lessonID),"
+                 + "Customer VARCHAR(250),"
+                 + "lessonType VARCHAR(250),"
+                 + "UNIQUE(lessonType),"
+                 + "sessionsRequired TEXT,"
+                 + "FOREIGN KEY(customer) REFERENCES Customer(username)"
+                 + ");";
+            
+         pst = con.prepareStatement(createTable4);
          pst.execute();
+         
+            String createTable5 = "CREATE TABLE IF NOT EXISTS Bookings("
+                    + "bookingID INT NOT NULL AUTO_INCREMENT,"
+                    + "PRIMARY KEY(bookingID),"
+                    + "customerID VARCHAR(250),"
+                    + "GCU_lesson VARCHAR(250),"
+                    + "GCU_rank VARCHAR(250),"
+                    + "FOREIGN KEY(customerID) REFERENCES Customer(username),"
+                    + "FOREIGN KEY(GCU_lesson) REFERENCES Lessons(lessonType));";
+            
+            pst = con.prepareStatement(createTable5);
+            pst.execute();
+         
          
          con.close();
             }
@@ -136,13 +169,13 @@ public class Menu extends javax.swing.JFrame {
 
         jPanel4 = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        Booking = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         txtLoginuser = new javax.swing.JTextField();
-        txtLoginpass = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        txtLoginpass = new javax.swing.JPasswordField();
         jPanel2 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
@@ -158,13 +191,15 @@ public class Menu extends javax.swing.JFrame {
         txtRegphone = new javax.swing.JTextField();
         txtRegemail = new javax.swing.JTextField();
         txtRegusername = new javax.swing.JTextField();
-        txtRegpassword = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        regPassword1 = new javax.swing.JPasswordField();
+        regPassword2 = new javax.swing.JPasswordField();
         jPanel3 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         txtStaffloginuser = new javax.swing.JTextField();
-        txtStaffloginpass = new javax.swing.JTextField();
         btnStafflogin = new javax.swing.JButton();
+        txtStaffloginpass = new javax.swing.JPasswordField();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -201,38 +236,34 @@ public class Menu extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(54, 54, 54)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtLoginpass)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
-                            .addComponent(txtLoginuser)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(151, 151, 151)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(150, 150, 150)
-                        .addComponent(jLabel1)))
-                .addGap(89, 90, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txtLoginpass)
+                    .addComponent(txtLoginuser)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(47, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtLoginuser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtLoginpass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
+                .addGap(53, 53, 53)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtLoginuser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtLoginpass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(62, 62, 62)
                 .addComponent(jButton1)
-                .addGap(34, 34, 34))
+                .addGap(15, 15, 15))
         );
 
-        jTabbedPane1.addTab("Login", jPanel1);
+        Booking.addTab("Login", jPanel1);
 
         jButton2.setText("Register");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -269,45 +300,59 @@ public class Menu extends javax.swing.JFrame {
             }
         });
 
+        jLabel12.setText("Re-enter");
+
+        regPassword1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                regPassword1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtRegemail, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRegfirstname, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtReglastname, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                            .addComponent(txtRegfirstname)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap(18, Short.MAX_VALUE)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel5)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtRegphone, javax.swing.GroupLayout.DEFAULT_SIZE, 81, Short.MAX_VALUE)
-                            .addComponent(txtReglastname))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                            .addComponent(txtRegemail, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                            .addComponent(txtRegphone))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel8)
                     .addComponent(jLabel7)
-                    .addComponent(jLabel10))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel10)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(txtRegusername, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
-                        .addComponent(txtRegpassword))
-                    .addComponent(cmbReggender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(cmbReggender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(regPassword2, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
+                            .addComponent(txtRegusername)
+                            .addComponent(regPassword1, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(71, 71, 71))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(46, 46, 46)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -329,22 +374,24 @@ public class Menu extends javax.swing.JFrame {
                         .addGap(23, 23, 23)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
-                            .addComponent(txtRegpassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
+                            .addComponent(regPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtRegphone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(txtRegemail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtRegphone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5))))
                 .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(txtRegemail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(regPassword2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
                 .addComponent(jButton2)
-                .addGap(25, 25, 25))
+                .addContainerGap())
         );
 
-        jTabbedPane1.addTab("Register", jPanel2);
+        Booking.addTab("Register", jPanel2);
 
         jLabel9.setText("Username:");
 
@@ -361,51 +408,51 @@ public class Menu extends javax.swing.JFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel9)
-                        .addGap(188, 188, 188))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(65, 65, 65))))
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(83, 83, 83)
+                .addGap(14, 14, 14)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnStafflogin, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(txtStaffloginuser, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                        .addComponent(txtStaffloginpass, javax.swing.GroupLayout.Alignment.LEADING)))
-                .addContainerGap(106, Short.MAX_VALUE))
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnStafflogin, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                    .addComponent(txtStaffloginpass, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                    .addComponent(txtStaffloginuser))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtStaffloginuser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
-                .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtStaffloginpass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(58, 58, 58)
+                .addGap(49, 49, 49)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtStaffloginuser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtStaffloginpass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel11))
+                .addGap(56, 56, 56)
                 .addComponent(btnStafflogin)
-                .addContainerGap())
+                .addGap(20, 20, 20))
         );
 
-        jTabbedPane1.addTab("Staff", jPanel3);
+        Booking.addTab("Staff", jPanel3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(Booking)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(Booking)
+                .addContainerGap())
         );
 
         pack();
@@ -420,31 +467,36 @@ public class Menu extends javax.swing.JFrame {
     }//GEN-LAST:event_txtRegphoneActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+     //create my mysql database connection
+     getConnection();
+     
+  
       try{
-
-            //create my mysql database connection
-            getConnection();
-            String query = "insert into User(customerStatus, title, firstname, lastname, contactNo, email, username, password)" 
+          //if statement ensures that both passwords entered match
+          
+           if(regPassword1.getText().equals(regPassword2.getText())){ 
+            String query = "INSERT INTO Customer(customerStatus, title, firstname, lastname, contactNo, email, username, password)" 
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
             pst = con.prepareStatement(query);
             
-            pst.setString(1,"Beginner");
+            pst.setString(1, null);
             pst.setString(2,cmbReggender.getSelectedItem().toString());
             pst.setString(3,txtRegfirstname.getText());
             pst.setString(4,txtReglastname.getText());
             pst.setString(5,txtRegphone.getText());
             pst.setString(6,txtRegemail.getText());
             pst.setString(7,txtRegusername.getText());
-            pst.setString(8,txtRegpassword.getText());
+            pst.setString(8,regPassword1.getText());
             pst.execute();
+      
             
-
-            
-            
-            String query2 = "insert into Login(username, password)" + "VALUES (?, ?)";
+                    
+                
+            String query2 = "INSERT INTO Login(username, password)" + "VALUES (?, ?)";
             pst = con.prepareStatement(query2);
             pst.setString(1,txtRegusername.getText());
-            pst.setString(2,txtRegpassword.getText());
+            pst.setString(2,regPassword1.getText());
             pst.execute();
             con.close();
             JOptionPane.showMessageDialog(null, "Registration completed!");
@@ -454,39 +506,70 @@ public class Menu extends javax.swing.JFrame {
             txtRegphone.setText("");
             txtRegemail.setText("");
             txtRegusername.setText("");
-            txtRegpassword.setText("");
-            
+            regPassword1.setText("");
+            regPassword2.setText("");
+     
+      }
+          
+           else{
+               
+               JOptionPane.showMessageDialog(null, "Passwords do not match");
            
-
-        }
+           }
+      }
+      
         catch (Exception e){
 
             System.err.println("Got an exception");
             System.err.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Something went wrong try to register again");
-
-
-        }
+            /*added statement here since I could not figure out a way to print specific 
+            error when uniquness constraint was met on username column in customer table
+            */
+            JOptionPane.showMessageDialog(null, "Username already taken");
+                }
+          
+          
+      
+      
+      
+      
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    
+    public void passUsername(){
+        /*this method was built to pass the username which was eneterd as a string in order to 
+        be able to identify which user was logged in.
+        */
+        
+        logged_in_customer = txtLoginuser.getText();
+        GCUbake test = new GCUbake(logged_in_customer);
+        this.dispose();
+        test.setVisible(true);
+        
+        
+        
+        
+    }
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
             
         
         
         try{
             getConnection();
-            
-            
+             
         String query ="SELECT * FROM Login Where username='"+txtLoginuser.getText()+ "' and password='" +txtLoginpass.getText() + "'";
+        
+        
         pst=con.prepareStatement(query);
         rs=pst.executeQuery();
         
         if(rs.next()){
+            logged_in_customer = txtLoginuser.getText();
             JOptionPane.showMessageDialog(null, "Login Successfully");
-            this.dispose();
-            GCUbake test = new GCUbake();
-            test.setVisible(true);
-            
+            System.out.println(logged_in_customer);
+            passUsername();
+           
         }
         
         else{
@@ -517,6 +600,7 @@ public class Menu extends javax.swing.JFrame {
         pst=con.prepareStatement(query);
         rs=pst.executeQuery();
         
+        
         if(rs.next()){
             JOptionPane.showMessageDialog(null, "Logged in as staff");
             this.dispose();
@@ -538,6 +622,10 @@ public class Menu extends javax.swing.JFrame {
             
         }
     }//GEN-LAST:event_btnStaffloginActionPerformed
+
+    private void regPassword1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regPassword1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_regPassword1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -575,6 +663,7 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTabbedPane Booking;
     private javax.swing.JButton btnStafflogin;
     private javax.swing.JComboBox<String> cmbReggender;
     private javax.swing.JButton jButton1;
@@ -582,6 +671,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -594,17 +684,17 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTextField txtLoginpass;
+    private javax.swing.JPasswordField regPassword1;
+    private javax.swing.JPasswordField regPassword2;
+    private javax.swing.JPasswordField txtLoginpass;
     private javax.swing.JTextField txtLoginuser;
     private javax.swing.JTextField txtRegemail;
     private javax.swing.JTextField txtRegfirstname;
     private javax.swing.JTextField txtReglastname;
-    private javax.swing.JTextField txtRegpassword;
     private javax.swing.JTextField txtRegphone;
     private javax.swing.JTextField txtRegusername;
-    private javax.swing.JTextField txtStaffloginpass;
+    private javax.swing.JPasswordField txtStaffloginpass;
     private javax.swing.JTextField txtStaffloginuser;
     // End of variables declaration//GEN-END:variables
 }
